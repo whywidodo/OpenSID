@@ -1222,19 +1222,16 @@ class Program_bantuan_model extends MY_Model {
 		return $kk;
 	}
 
-	// Perbaikan
+	// -------------------------------- Perbaikan --------------------------------
 	// - Program Bantuan
 	public function paging_program($p)
 	{
-		$this->db->select('COUNT(p.id) AS jml');
-		$this->list_data_program_sql();
-
-		$row = $this->db->get()->row_array();
+		$jml_data = count($this->list_data_program());
 
 		$this->load->library('paging');
 		$cfg['page'] = $p;
 		$cfg['per_page'] = $this->session->per_page;
-		$cfg['num_rows'] = $row['jml'];
+		$cfg['num_rows'] = $jml_data;
 		$this->paging->init($cfg);
 
 		return $this->paging;
@@ -1242,9 +1239,12 @@ class Program_bantuan_model extends MY_Model {
 
 	public function list_data_program($order_by = 0, $offset = 0, $limit = 0)
 	{
-		$this->db->select('p.*, COUNT(p.id) AS jml');
+		$this->db->select('p.*, COUNT(pp.id) AS jml_peserta')
+			->from("program p")
+			->join("program_peserta pp", "p.id = pp.program_id")
+			->group_by('p.id');
 
-		$this->list_data_program_sql();
+		$this->search();
 
 		switch ($order_by)
 		{
@@ -1252,8 +1252,10 @@ class Program_bantuan_model extends MY_Model {
 			case 2: $this->db->order_by('p.nama', DESC); break;
 			case 3: $this->db->order_by('p.asaldana'); break;
 			case 4: $this->db->order_by('p.asaldana', DESC); break;
-			case 5: $this->db->order_by('p.sasaran'); break;
-			case 6: $this->db->order_by('p.sasaran', DESC); break;
+			case 5: $this->db->order_by('jml_peserta'); break;
+			case 6: $this->db->order_by('jml_peserta', DESC); break;
+			case 7: $this->db->order_by('p.sasaran'); break;
+			case 8: $this->db->order_by('p.sasaran', DESC); break;
 			default: $this->db->order_by('p.id'); break;;
 		}
 
@@ -1264,15 +1266,4 @@ class Program_bantuan_model extends MY_Model {
 		return $data;
 	}
 
-	private function list_data_program_sql()
-	{
-		$this->db
-			->from("program p")
-			->join("program_peserta pp", "p.id = pp.program_id")
-			->group_by('p.id');
-
-		//$this->search_sql();
-	}
-
 }
-?>

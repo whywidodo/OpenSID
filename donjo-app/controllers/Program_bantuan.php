@@ -54,23 +54,8 @@ class Program_bantuan extends Admin_Controller {
 		parent::__construct();
 		$this->load->model(['program_bantuan_model', 'config_model']);
 		$this->modul_ini = 6;
-		$this->_set_page = ['20', '50', '100'];
-	}
-
-	public function clear()
-	{
-		$this->session->per_page = $this->_set_page[0];
-		$this->session->unset_userdata('sasaran');
-		redirect('program_bantuan');
-	}
-
-	public function filter($filter)
-	{
-		$value = $this->input->post($filter);
-		if ($value != '')
-			$this->session->$filter = $value;
-		else $this->session->unset_userdata($filter);
-		redirect('program_bantuan');
+		//$this->_set_page = ['20', '50', '100'];
+		$this->_set_page = ['1', '2', '100'];
 	}
 
 	public function form($program_id = 0)
@@ -297,24 +282,46 @@ class Program_bantuan extends Admin_Controller {
 		redirect("program_bantuan/detail/$program_id");
 	}
 
-	// Perbaikan
+	// -------------------------------- Perbaikan --------------------------------
 	// - Program Bantuan
+	public function clear()
+	{
+		$this->session->per_page = $this->_set_page[0];
+		$this->session->unset_userdata('sasaran');
+		redirect('program_bantuan');
+	}
+
 	public function index($p = 1)
 	{
+		$data['order_by'] = $this->session->order_by ?: '';
+		$data['sasaran'] = $this->session->sasaran ?: '';
+		$data['list_sasaran'] = unserialize(SASARAN);
+
 		$per_page = $this->input->post('per_page');
 		if (isset($per_page))
 			$this->session->per_page = $per_page;
 
 		$data['func'] = 'index';
 		$data['set_page'] = $this->_set_page;
-		$data['sasaran'] = $this->session->sasaran ?: '';
-		$data['list_sasaran'] = unserialize(SASARAN);
 		$data['paging'] = $this->program_bantuan_model->paging_program($p);
-		$data['main'] = $this->program_bantuan_model->list_data_program($o, $data['paging']->offset, $data['paging']->per_page);
+		$data['main'] = $this->program_bantuan_model->list_data_program($data['order_by'], $data['paging']->offset, $data['paging']->per_page);
 
 		$this->render('program_bantuan/program', $data);
 		//echo json_encode($data, TRUE);
 	}
 
+	public function filter($filter = '', $page = 1, $order_by = 0)
+	{
+		if ($filter == "dusun") $this->session->unset_userdata(['rw', 'rt']);
+		if ($filter == "rw") $this->session->unset_userdata("rt");
+
+		$value = $order_by ?: $this->input->post($filter);
+		if ($value != "")
+			$this->session->$filter = $value;
+		else $this->session->unset_userdata($filter);
+
+		if ($page > 1) $link = "/index/$page";
+		redirect("program_bantuan$link");
+	}
 
 }
