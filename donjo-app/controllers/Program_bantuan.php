@@ -73,22 +73,6 @@ class Program_bantuan extends Admin_Controller {
 		redirect('program_bantuan');
 	}
 
-	public function index($p = 1)
-	{
-		$per_page = $this->input->post('per_page');
-		if (isset($per_page))
-			$this->session->per_page = $per_page;
-
-		$data = $this->program_bantuan_model->get_program($p, FALSE);
-		$data['list_sasaran'] = unserialize(SASARAN);
-		$data['func'] = 'index';
-		$data['per_page'] = $this->session->per_page;
-		$data['set_page'] = $this->_set_page;
-		$data['set_sasaran'] = $this->session->sasaran;
-
-		$this->render('program_bantuan/program', $data);
-	}
-
 	public function form($program_id = 0)
 	{
 		$data['program'] = $this->program_bantuan_model->get_program(1, $program_id);
@@ -312,4 +296,25 @@ class Program_bantuan extends Admin_Controller {
 
 		redirect("program_bantuan/detail/$program_id");
 	}
+
+	// Perbaikan
+	// - Program Bantuan
+	public function index($p = 1)
+	{
+		$per_page = $this->input->post('per_page');
+		if (isset($per_page))
+			$this->session->per_page = $per_page;
+
+		$data['func'] = 'index';
+		$data['set_page'] = $this->_set_page;
+		$data['sasaran'] = $this->session->sasaran ?: '';
+		$data['list_sasaran'] = unserialize(SASARAN);
+		$data['paging'] = $this->program_bantuan_model->paging_program($p);
+		$data['main'] = $this->program_bantuan_model->list_data_program($o, $data['paging']->offset, $data['paging']->per_page);
+
+		$this->render('program_bantuan/program', $data);
+		//echo json_encode($data, TRUE);
+	}
+
+
 }

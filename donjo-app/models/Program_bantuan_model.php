@@ -1,4 +1,6 @@
-<?php if(!defined('BASEPATH')) exit('No direct script access allowed');
+<?php
+
+defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * File ini:
@@ -1218,6 +1220,58 @@ class Program_bantuan_model extends MY_Model {
 					->row_array();
 
 		return $kk;
+	}
+
+	// Perbaikan
+	// - Program Bantuan
+	public function paging_program($p)
+	{
+		$this->db->select('COUNT(p.id) AS jml');
+		$this->list_data_program_sql();
+
+		$row = $this->db->get()->row_array();
+
+		$this->load->library('paging');
+		$cfg['page'] = $p;
+		$cfg['per_page'] = $this->session->per_page;
+		$cfg['num_rows'] = $row['jml'];
+		$this->paging->init($cfg);
+
+		return $this->paging;
+	}
+
+	public function list_data_program($order_by = 0, $offset = 0, $limit = 0)
+	{
+		$this->db->select('p.*, COUNT(p.id) AS jml');
+
+		$this->list_data_program_sql();
+
+		switch ($order_by)
+		{
+			case 1: $this->db->order_by('p.nama'); break;
+			case 2: $this->db->order_by('p.nama', DESC); break;
+			case 3: $this->db->order_by('p.asaldana'); break;
+			case 4: $this->db->order_by('p.asaldana', DESC); break;
+			case 5: $this->db->order_by('p.sasaran'); break;
+			case 6: $this->db->order_by('p.sasaran', DESC); break;
+			default: $this->db->order_by('p.id'); break;;
+		}
+
+		if ($limit > 0 ) $this->db->limit($limit, $offset);
+
+		$data = $this->db->get()->result_array();
+
+		return $data;
+	}
+
+	private function list_data_program_sql()
+	{
+		$this->db
+			->from("program p")
+			->join("program_peserta pp", "p.id = pp.program_id")
+			->group_by('p.id');
+
+		//$this->search_sql();
 	}
 
 }

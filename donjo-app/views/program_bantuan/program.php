@@ -18,67 +18,56 @@
 						<?php endif; ?>
 					</div>
 					<div class="box-body">
-						<div class="row">
-							<div class="col-sm-12">
-								<div class="dataTables_wrapper form-inline dt-bootstrap no-footer">
-									<div class="row">
-										<div class="col-sm-9">
-											<form id="mainform" name="mainform" action="" method="post">
-												<select class="form-control input-sm" name="sasaran" onchange="formAction('mainform', '<?=site_url('program_bantuan/filter/sasaran')?>')">
-													<option value="">Pilih Sasaran</option>
-													<?php foreach ($list_sasaran AS $key => $value): ?>
-														<option value="<?= $key; ?>" <?= selected($set_sasaran, $key); ?>><?= $value?></option>
-													<?php endforeach; ?>
-												</select>
-											</form>
-										</div>
-										<div class="col-sm-12">
-											<div class="table-responsive">
-												<table class="table table-bordered table-striped dataTable table-hover" id="table-program">
-													<thead class="bg-gray disabled color-palette">
-														<tr>
-															<th width="1%">No</th>
-															<th width="5%">Aksi</th>
-															<th nowrap>Nama Program</th>
-															<th>Asal Dana</th>
-															<th>Jumlah Peserta</th>
-															<th nowrap>Masa Berlaku</th>
-															<th>Sasaran</th>
-															<th>Status</th>
-														</tr>
-													</thead>
-													<tbody>
-														<?php $nomer = $paging->offset; ?>
-														<?php foreach ($program as $item): ?>
-															<?php $nomer++; ?>
-															<tr>
-																<td class="text-center"><?= $nomer?></td>
-																<td nowrap>
-																	<a href="<?= site_url("program_bantuan/detail/$item[id]")?>" class="btn bg-purple btn-flat btn-sm"  title="Rincian"><i class="fa fa-list"></i></a>
-																	<a href="<?= site_url("program_bantuan/edit/$item[id]")?>" class="btn bg-orange btn-flat btn-sm"  title="Ubah"><i class="fa fa-edit"></i></a>
-																	<?php if ($item['jml_peserta'] != 0): ?>
-																		<a href="#" class="btn bg-maroon btn-flat btn-sm disabled"  title="Hapus" data-toggle="modal" data-target="#confirm-delete"><i class="fa fa-trash-o"></i></a>
-																	<?php endif ?>
-																	<?php if ($item['jml_peserta'] == 0): ?>
-																		<a href="#" data-href="<?= site_url("program_bantuan/hapus/$item[id]")?>" class="btn bg-maroon btn-flat btn-sm"  title="Hapus" data-toggle="modal" data-target="#confirm-delete"><i class="fa fa-trash-o"></i></a>
-																	<?php endif ?>
-																</td>
-																<td nowrap><a href="<?= site_url("program_bantuan/detail/$item[id]")?>"><?= $item["nama"] ?></a></td>
-																<td><?= $item['asaldana']?></td>
-																<td><?= $item['jml_peserta']?></td>
-																<td nowrap><?= fTampilTgl($item["sdate"],$item["edate"]);?></td>
-																<td nowrap><?= $sasaran[$item["sasaran"]]?></td>
-																<td><?= $item['status'] ?></td>
-															</tr>
-														<?php endforeach; ?>
-													</tbody>
-												</table>
-											</div>
-										</div>
-									</div>
-									<?php $this->load->view('global/paging');?>
+						<div class="dataTables_wrapper form-inline dt-bootstrap no-footer">
+							<div class="row">
+								<div class="col-sm-9">
+									<form id="mainform" name="mainform" action="" method="post">
+										<select class="form-control input-sm" name="sasaran" onchange="formAction('mainform', '<?=site_url('program_bantuan/filter/sasaran')?>')">
+											<option value="">Pilih Sasaran</option>
+											<?php foreach ($list_sasaran AS $key => $value): ?>
+												<option value="<?= $key; ?>" <?= selected($set_sasaran, $key); ?>><?= $value?></option>
+											<?php endforeach; ?>
+										</select>
+									</form>
 								</div>
 							</div>
+							<div class="table-responsive">
+									<table class="table table-bordered table-striped dataTable table-hover tabel-daftar">
+										<thead class="bg-gray disabled color-palette">
+											<tr>
+												<th>No</th>
+												<th>Aksi</th>
+												<th>Nama Program</th>
+												<th>Asal Dana</th>
+												<th>Jumlah Peserta</th>
+												<th>Masa Berlaku</th>
+												<th>Sasaran</th>
+												<th>Status</th>
+											</tr>
+										</thead>
+										<tbody>
+											<?php foreach ($main as $key => $data): ?>
+												<tr>
+													<td class="padat"><?= ($paging->offset + $key + 1) ; ?></td>
+													<td class="aksi">
+														<a href="<?= site_url("program_bantuan/detail/$data[id]")?>" class="btn bg-purple btn-flat btn-sm"  title="Rincian"><i class="fa fa-list"></i></a>
+														<a href="<?= site_url("program_bantuan/edit/$data[id]")?>" class="btn bg-orange btn-flat btn-sm"  title="Ubah"><i class="fa fa-edit"></i></a>
+														<?php if ($this->CI->cek_hak_akses('h')): ?>
+															<a href="#" data-href="<?= site_url("program_bantuan/hapus/$data[id]")?>" class="btn bg-maroon btn-flat btn-sm <?= ($data[jml] > 1)?:'disabled'; ?>"  title="Hapus" data-toggle="modal" data-target="#confirm-delete"><i class="fa fa-trash-o"></i></a>
+														<?php endif ?>
+													</td>
+													<td nowrap><a href="<?= site_url("program_bantuan/detail/$data[id]")?>"><?= $data['nama']; ?></a></td>
+													<td><?= $data['asaldana']; ?></td>
+													<td class="padat"><?= $data['jml']; ?></td>
+													<td nowrap><?= fTampilTgl($data['sdate'], $data['edate']); ?></td>
+													<td nowrap><?= $list_sasaran[$data['sasaran']]; ?></td>
+													<td><?= $data['status'] ?></td>
+												</tr>
+											<?php endforeach; ?>
+										</tbody>
+									</table>
+							</div>
+							<?php $this->load->view('global/paging'); ?>
 						</div>
 					</div>
 				</div>
@@ -86,4 +75,4 @@
 		</div>
 	</section>
 </div>
-<?php $this->load->view('global/confirm_delete');?>
+<?php $this->load->view('global/confirm_delete'); ?>
