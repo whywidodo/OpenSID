@@ -54,8 +54,8 @@ class Program_bantuan extends Admin_Controller {
 		parent::__construct();
 		$this->load->model(['program_bantuan_model', 'config_model']);
 		$this->modul_ini = 6;
-		//$this->_set_page = ['20', '50', '100'];
-		$this->_set_page = ['1', '2', '100'];
+		$this->_set_page = ['20', '50', '100'];
+		//$this->_set_page = ['1', '2', '100'];
 	}
 
 	public function form_($program_id = 0)
