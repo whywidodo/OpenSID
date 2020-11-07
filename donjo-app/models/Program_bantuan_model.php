@@ -1171,8 +1171,6 @@ class Program_bantuan_model extends MY_Model {
 	{
 		$this->query_data_program();
 
-		//$this->search();
-
 		switch ($order_by)
 		{
 			case 1: $this->db->order_by('p.nama'); break;
@@ -1222,6 +1220,18 @@ class Program_bantuan_model extends MY_Model {
 			->from('program p')
 			->join('program_peserta pp', 'p.id = pp.program_id', 'LEFT')
 			->group_by('p.id');
+
+		$this->query_filter_program('sasaran', 'p.sasaran');
+	}
+
+	private function query_filter_program($session, $field)
+	{
+		$value = $this->session->$session;
+
+		if (isset($value))
+		{
+			$this->db->where($field, $value);
+		}
 	}
 
 	public function tambah_program()

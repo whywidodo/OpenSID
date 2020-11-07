@@ -294,7 +294,7 @@ class Program_bantuan extends Admin_Controller {
 		else $this->session->unset_userdata($filter);
 
 		if ($page > 1) $link = "/index/$page";
-		redirect("program_bantuan$link");
+		redirect("program_bantuan" . "$link");
 	}
 
 }
