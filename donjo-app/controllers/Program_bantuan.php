@@ -79,11 +79,6 @@ class Program_bantuan extends Admin_Controller {
 		$this->render('program_bantuan/form', $data);
 	}
 
-	public function panduan()
-	{
-		$this->render('program_bantuan/panduan', $data);
-	}
-
 	public function detail($program_id = 0, $p = 1)
 	{
 		$per_page = $this->input->post('per_page');
@@ -226,7 +221,7 @@ class Program_bantuan extends Admin_Controller {
 	public function clear()
 	{
 		$this->session->per_page = $this->_set_page[0];
-		$this->session->unset_userdata('sasaran');
+		$this->session->unset_userdata(['sasaran' , 'order_by']);
 		redirect('program_bantuan');
 	}
 
