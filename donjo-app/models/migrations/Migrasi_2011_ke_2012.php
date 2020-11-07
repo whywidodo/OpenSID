@@ -5,7 +5,7 @@
  *
  * Model untuk migrasi database
  *
- * donjo-app/models/migrations/Migrasi_2010_ke_2011.php
+ * donjo-app/models/migrations/Migrasi_2011_ke_2012.php
  *
  */
 
@@ -80,5 +80,48 @@ class Migrasi_2011_ke_2012 extends MY_model {
 			$this->db->query($query);
   	}
 
+		// Ubah struktur table program_peserta
+		$hasil =& $this->db->query('ALTER TABLE `program_peserta` CHANGE COLUMN `kartu_id_pend` `kartu_id_pend` INT(11) NULL DEFAULT NULL AFTER `no_id_kartu`');
+		$hasil =& $this->db->query('ALTER TABLE `program_peserta` CHANGE COLUMN `program_id` `program_id` INT(11) NOT NULL AFTER `id`');
+		// Ganti paramter menjadi id u/ tiap sasaran
+		$list_peserta = $this->db
+			->select('pp.*, p.sasaran')
+			->from('program_peserta pp')
+			->join('program p', 'p.id = pp.program_id')
+			->get()
+			->result_array();
+
+		foreach ($list_peserta as $peserta)
+		{
+			switch ($peserta['sasaran'])
+			{
+				// Penduduk
+				case 1:
+					$id = $this->db->select('id')->get_where('tweb_penduduk', ['nik' => $peserta['peserta']])->row()->id;
+					break;
+
+				// Keluarga
+				case 2:
+					$id = $this->db->select('id')->get_where('tweb_keluarga', ['no_kk' => $peserta['peserta']])->row()->id;
+					break;
+
+				// Rumah Tangga
+				case 3:
+					// no_kk = no_rtm (lain kali disesuaikan)
+					$id = $this->db->select('id')->get_where('tweb_rtm', ['no_kk' => $peserta['peserta']])->row()->id;
+					break;
+
+				// Kelompok
+				default:
+					// Krn peserta sasaran kelompok sdah menggunakan id, maka tdk perlu di ubah lg.
+					$id = $peserta['peserta'];
+					break;
+			}
+
+			$this->db->where('id', $peserta['id'])->update('program_peserta', ['peserta' => $id]);
+		}
+
+		status_sukses($hasil);
 	}
+
 }
