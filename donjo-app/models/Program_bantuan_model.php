@@ -727,14 +727,6 @@ class Program_bantuan_model extends MY_Model {
 		}
 	}
 
-	// Ambil data program
-	function get_data_program($id)
-	{
-		// Untuk program bantuan, $id '50<program_id>'
-		$program_id = preg_replace("/^50/", "", $id);
-		return $this->db->select("*")->where("id", $program_id)->get("program")->row_array();
-	}
-
 	/*
 	 * Fungsi untuk menampilkan program bantuan yang sedang diterima peserta.
 	 * $id => id_peserta tergantung sasaran
@@ -852,28 +844,6 @@ class Program_bantuan_model extends MY_Model {
 		{
 			return null;
 		}
-	}
-
-	public function set_program()
-	{
-		$data = $this->validasi_bantuan($this->input->post());
-		$data['userid'] = $this->session->user;
-
-		return $this->db->insert('program', $data);
-	}
-
-	private function validasi_bantuan($post)
-	{
-		$data = [];
-		// Ambil dan bersihkan data input
-		$data['sasaran'] = $post['cid'];
-		$data['nama'] = nomor_surat_keputusan($post['nama']);
-		$data['ndesc'] = htmlentities($post['ndesc']);
-		$data['asaldana'] = $post['asaldana'];
-		$data['sdate'] = date("Y-m-d", strtotime($post['sdate']));
-		$data['edate'] = date("Y-m-d", strtotime($post['edate']));
-		$data['status'] = $post['status'];
-		return $data;
 	}
 
 	public function add_peserta($program_id)
@@ -1019,23 +989,6 @@ class Program_bantuan_model extends MY_Model {
 		return $data;
 	}
 
-	public function update_program($id)
-	{
-		$data = $this->validasi_bantuan($this->input->post());
-		$hasil = $this->db->where('id', $id)
-			->update('program', $data);
-
-		if ($hasil)
-		{
-			$_SESSION["success"] = 1;
-			$_SESSION["pesan"] = "Data program telah diperbarui";
-		}
-		else
-		{
-			$_SESSION["success"] = -1;
-		}
-	}
-
 	public function jml_peserta_program($id)
 	{
 		$jml_peserta = $this->db->select('count(v.program_id) as jml')->
@@ -1045,29 +998,6 @@ class Program_bantuan_model extends MY_Model {
 			get()->row()->jml;
 
 		return $jml_peserta;
-	}
-
-	/*
-		Program yang sudah ada pesertanya tidak boleh dihapus
-	*/
-	public function hapus_program($id)
-	{
-		if ($this->jml_peserta_program($id) > 0)
-		{
-			$_SESSION["success"] = -1;
-			return;
-		}
-
-		$hasil = $this->db->where('id', $id)->delete('program');
-		if ($hasil)
-		{
-			$_SESSION["success"] = 1;
-			$_SESSION["pesan"] = "Data program telah dihapus";
-		}
-		else
-		{
-			$_SESSION["success"] = -1;
-		}
 	}
 
 	/* Mendapatkan daftar bantuan yang diterima oleh penduduk
@@ -1239,12 +1169,21 @@ class Program_bantuan_model extends MY_Model {
 
 	public function list_data_program($order_by = 0, $offset = 0, $limit = 0)
 	{
-		$this->db->select('p.*, COUNT(pp.id) AS jml_peserta')
-			->from("program p")
-			->join("program_peserta pp", "p.id = pp.program_id")
+		$this->db
+			->select('p.*, COUNT(pp.id) AS jml_peserta')
+			->select("(
+				CASE WHEN (DATE(p.sdate) <= CURDATE() AND DATE(p.edate) >= CURDATE())
+					THEN
+						'Aktif'
+					ELSE
+						'Tidak Aktif'
+					END) AS status
+				")
+			->from('program p')
+			->join('program_peserta pp', 'p.id = pp.program_id', 'LEFT')
 			->group_by('p.id');
 
-		$this->search();
+		//$this->search();
 
 		switch ($order_by)
 		{
@@ -1262,6 +1201,65 @@ class Program_bantuan_model extends MY_Model {
 		if ($limit > 0 ) $this->db->limit($limit, $offset);
 
 		$data = $this->db->get()->result_array();
+
+		return $data;
+	}
+
+	public function get_data_program($id = '')
+	{
+		$data = $this->db
+			->select('p.*, COUNT(pp.id) AS jml_peserta')
+			->select("(
+				CASE WHEN (DATE(p.sdate) >= CURDATE())
+					THEN
+						'Aktif'
+					ELSE
+						'Tidak Aktif'
+					END) AS status
+				")
+			->from('program p')
+			->join('program_peserta pp', 'p.id = pp.program_id', 'LEFT')
+			->where('p.id', $id)
+			->group_by('p.id')
+			->get()
+			->row_array();
+
+		return $data;
+	}
+
+	public function tambah_program()
+	{
+		$data = $this->validasi_program($this->input->post());
+		$hasil = $this->db->insert('program', $data);
+
+		status_sukses($hasil, TRUE);
+	}
+
+	public function ubah_program($id = 0)
+	{
+		$data = $this->validasi_program($this->input->post());
+		$hasil = $this->db->where('id', $id)->update('program', $data);
+
+		status_sukses($hasil, TRUE);
+	}
+
+	public function hapus_program($id = 0)
+	{
+		$hasil = $this->db->where('id', $id)->delete('program');
+
+		status_sukses($hasil, TRUE);
+	}
+
+	private function validasi_program($post)
+	{
+		$data = [];
+		$data['sasaran'] = ( ! $post['sasaran'])?: bilangan($post['sasaran']);
+		$data['nama'] = nomor_surat_keputusan($post['nama']);
+		$data['ndesc'] = htmlentities($post['ndesc']);
+		$data['asaldana'] = htmlentities($post['asaldana']);
+		$data['sdate'] = date("Y-m-d", strtotime($post['sdate']));
+		$data['edate'] = date("Y-m-d", strtotime($post['edate']));
+		$data['userid'] = $this->session->user;
 
 		return $data;
 	}

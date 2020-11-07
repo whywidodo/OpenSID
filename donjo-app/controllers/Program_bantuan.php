@@ -58,7 +58,7 @@ class Program_bantuan extends Admin_Controller {
 		$this->_set_page = ['1', '2', '100'];
 	}
 
-	public function form($program_id = 0)
+	public function form_($program_id = 0)
 	{
 		$data['program'] = $this->program_bantuan_model->get_program(1, $program_id);
 		$sasaran = $data['program'][0]['sasaran'];
@@ -183,72 +183,11 @@ class Program_bantuan extends Admin_Controller {
 		$this->load->view('program_bantuan/edit_peserta', $data);
 	}
 
-	public function create()
-	{
-		$this->load->helper('form');
-		$this->load->library('form_validation');
-
-		$this->form_validation->set_rules('cid', 'Sasaran', 'required');
-		$this->form_validation->set_rules('nama', 'Nama Program', 'required');
-		$this->form_validation->set_rules('sdate', 'Tanggal awal', 'required');
-		$this->form_validation->set_rules('edate', 'Tanggal akhir', 'required');
-		$this->form_validation->set_rules('asaldana', 'Asal Dana', 'required');
-		$this->form_validation->set_rules('status', 'Status', 'required');
-
-		$data['asaldana'] = unserialize(ASALDANA);
-
-		if ($this->form_validation->run() === FALSE)
-		{
-			$this->render('program_bantuan/create', $data);
-		}
-		else
-		{
-			$this->program_bantuan_model->set_program();
-			redirect("program_bantuan");
-		}
-	}
-
-	// $id = program.id
-	public function edit($id = 0)
-	{
-		$this->load->helper('form');
-		$this->load->library('form_validation');
-
-		$this->form_validation->set_rules('cid', 'Sasaran', 'required');
-		$this->form_validation->set_rules('nama', 'Nama Program', 'required');
-		$this->form_validation->set_rules('sdate', 'Tanggal awal', 'required');
-		$this->form_validation->set_rules('edate', 'Tanggal akhir', 'required');
-		$this->form_validation->set_rules('asaldana', 'Asal Dana', 'required');
-		$this->form_validation->set_rules('status', 'Status', 'required');
-
-		$data['asaldana'] = unserialize(ASALDANA);
-		$data['program'] = $this->program_bantuan_model->get_program(1, $id);
-		$data['jml'] = $this->program_bantuan_model->jml_peserta_program($id);
-
-		if ($this->form_validation->run() === FALSE)
-		{
-			$this->render('program_bantuan/edit', $data);
-		}
-		else
-		{
-			$this->program_bantuan_model->update_program($id);
-			redirect("program_bantuan");
-		}
-	}
-
 	// $id = program.id
 	public function update($id)
 	{
 		$this->program_bantuan_model->update_program($id);
 		redirect("program_bantuan/detail/$id");
-	}
-
-	// $id = program.id
-	public function hapus($id)
-	{
-		$this->redirect_hak_akses('h', "program_bantuan");
-		$this->program_bantuan_model->hapus_program($id);
-		redirect("program_bantuan");
 	}
 
 	/*
@@ -293,9 +232,9 @@ class Program_bantuan extends Admin_Controller {
 
 	public function index($p = 1)
 	{
-		$data['order_by'] = $this->session->order_by ?: '';
 		$data['sasaran'] = $this->session->sasaran ?: '';
 		$data['list_sasaran'] = unserialize(SASARAN);
+		$data['order_by'] = $this->session->order_by ?: '';
 
 		$per_page = $this->input->post('per_page');
 		if (isset($per_page))
@@ -308,6 +247,45 @@ class Program_bantuan extends Admin_Controller {
 
 		$this->render('program_bantuan/program', $data);
 		//echo json_encode($data, TRUE);
+	}
+
+	public function form_program($id = 0)
+	{
+		if ($id)
+		{
+			$data['form_action'] = site_url("program_bantuan/ubah_program/$id");
+			$data['program'] = $this->program_bantuan_model->get_data_program($id);
+		}
+		else
+		{
+			$data['form_action'] = site_url("program_bantuan/tambah_program");
+			$data['program'] = NULL;
+		}
+
+		$data['asaldana'] = unserialize(ASALDANA);
+		$data['list_sasaran'] = unserialize(SASARAN);
+
+		$this->render('program_bantuan/form_program', $data);
+		//echo json_encode($data, TRUE);
+	}
+
+	public function tambah_program()
+	{
+		$this->program_bantuan_model->tambah_program();
+		redirect("program_bantuan");
+	}
+
+	public function ubah_program($id)
+	{
+		$this->program_bantuan_model->ubah_program($id);
+		redirect("program_bantuan");
+	}
+
+	public function hapus_program($id)
+	{
+		$this->redirect_hak_akses('h', "program_bantuan");
+		$this->program_bantuan_model->hapus_program($id);
+		redirect("program_bantuan");
 	}
 
 	public function filter($filter = '', $page = 1, $order_by = 0)
