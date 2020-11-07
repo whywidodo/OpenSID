@@ -1169,19 +1169,7 @@ class Program_bantuan_model extends MY_Model {
 
 	public function list_data_program($order_by = 0, $offset = 0, $limit = 0)
 	{
-		$this->db
-			->select('p.*, COUNT(pp.id) AS jml_peserta')
-			->select("(
-				CASE WHEN (DATE(p.sdate) <= CURDATE() AND DATE(p.edate) >= CURDATE())
-					THEN
-						'Aktif'
-					ELSE
-						'Tidak Aktif'
-					END) AS status
-				")
-			->from('program p')
-			->join('program_peserta pp', 'p.id = pp.program_id', 'LEFT')
-			->group_by('p.id');
+		$this->query_data_program();
 
 		//$this->search();
 
@@ -1207,10 +1195,22 @@ class Program_bantuan_model extends MY_Model {
 
 	public function get_data_program($id = '')
 	{
+		$this->query_data_program();
+
 		$data = $this->db
+			->where('p.id', $id)
+			->get()
+			->row_array();
+
+		return $data;
+	}
+
+	public function query_data_program()
+	{
+		$this->db
 			->select('p.*, COUNT(pp.id) AS jml_peserta')
 			->select("(
-				CASE WHEN (DATE(p.sdate) >= CURDATE())
+				CASE WHEN (DATE(p.sdate) <= CURDATE() AND DATE(p.edate) >= CURDATE())
 					THEN
 						'Aktif'
 					ELSE
@@ -1219,12 +1219,7 @@ class Program_bantuan_model extends MY_Model {
 				")
 			->from('program p')
 			->join('program_peserta pp', 'p.id = pp.program_id', 'LEFT')
-			->where('p.id', $id)
-			->group_by('p.id')
-			->get()
-			->row_array();
-
-		return $data;
+			->group_by('p.id');
 	}
 
 	public function tambah_program()
