@@ -1183,7 +1183,9 @@ class Program_bantuan_model extends MY_Model {
 			case 6: $this->db->order_by('jml_peserta', DESC); break;
 			case 7: $this->db->order_by('p.sasaran'); break;
 			case 8: $this->db->order_by('p.sasaran', DESC); break;
-			default: $this->db->order_by('p.id'); break;;
+			case 9: $this->db->order_by('status'); break;
+			case 10: $this->db->order_by('status', DESC); break;
+			default: $this->db->order_by('p.id', DESC); break;;
 		}
 
 		if ($limit > 0 ) $this->db->limit($limit, $offset);
@@ -1205,7 +1207,7 @@ class Program_bantuan_model extends MY_Model {
 		return $data;
 	}
 
-	public function query_data_program()
+	private function query_data_program()
 	{
 		$this->db
 			->select('p.*, COUNT(pp.id) AS jml_peserta')
@@ -1240,9 +1242,14 @@ class Program_bantuan_model extends MY_Model {
 
 	public function hapus_program($id = 0)
 	{
+		if (count($this->get_data_program($id) > 0))
+		{
+			return $this->session->success = -4;
+		}
+
 		$hasil = $this->db->where('id', $id)->delete('program');
 
-		status_sukses($hasil, TRUE);
+		$this->session->success = 4;
 	}
 
 	private function validasi_program($post)
