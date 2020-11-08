@@ -44,24 +44,30 @@
 									</tr>
 								</thead>
 								<tbody>
-									<?php foreach ($main as $key => $data): ?>
+									<?php if ($main): ?>
+										<?php foreach ($main as $key => $data): ?>
+											<tr>
+												<td class="padat"><?= ($paging->offset + $key + 1) ; ?></td>
+												<td class="aksi">
+													<a href="<?= site_url("program_bantuan/rincian/$data[id]")?>" class="btn bg-purple btn-flat btn-sm"  title="Rincian"><i class="fa fa-list"></i></a>
+													<a href="<?= site_url("program_bantuan/form_program/$data[id]")?>" class="btn bg-orange btn-flat btn-sm"  title="Ubah"><i class="fa fa-edit"></i></a>
+													<?php if ($this->CI->cek_hak_akses('h')): ?>
+														<a href="#" data-href="<?= site_url("program_bantuan/hapus_program/$data[id]")?>" class="btn bg-maroon btn-flat btn-sm <?= ($data[jml_peserta] < 1)?:'disabled'; ?>"  title="Hapus" data-toggle="modal" data-target="#confirm-delete"><i class="fa fa-trash-o"></i></a>
+													<?php endif ?>
+												</td>
+												<td nowrap><a href="<?= site_url("program_bantuan/rincian/$data[id]")?>"><?= $data['nama']; ?></a></td>
+												<td><?= $data['asaldana']; ?></td>
+												<td class="padat"><?= $data['jml_peserta']; ?></td>
+												<td nowrap><?= fTampilTgl($data['sdate'], $data['edate']); ?></td>
+												<td nowrap><?= $list_sasaran[$data['sasaran']]; ?></td>
+												<td class="padat"><?= $data['status']; ?></td>
+											</tr>
+										<?php endforeach; ?>
+									<?php else: ?>
 										<tr>
-											<td class="padat"><?= ($paging->offset + $key + 1) ; ?></td>
-											<td class="aksi">
-												<a href="<?= site_url("program_bantuan/detail/$data[id]")?>" class="btn bg-purple btn-flat btn-sm"  title="Rincian"><i class="fa fa-list"></i></a>
-												<a href="<?= site_url("program_bantuan/form_program/$data[id]")?>" class="btn bg-orange btn-flat btn-sm"  title="Ubah"><i class="fa fa-edit"></i></a>
-												<?php if ($this->CI->cek_hak_akses('h')): ?>
-													<a href="#" data-href="<?= site_url("program_bantuan/hapus_program/$data[id]")?>" class="btn bg-maroon btn-flat btn-sm <?= ($data[jml_peserta] < 1)?:'disabled'; ?>"  title="Hapus" data-toggle="modal" data-target="#confirm-delete"><i class="fa fa-trash-o"></i></a>
-												<?php endif ?>
-											</td>
-											<td nowrap><a href="<?= site_url("program_bantuan/detail/$data[id]")?>"><?= $data['nama']; ?></a></td>
-											<td><?= $data['asaldana']; ?></td>
-											<td class="padat"><?= $data['jml_peserta']; ?></td>
-											<td nowrap><?= fTampilTgl($data['sdate'], $data['edate']); ?></td>
-											<td nowrap><?= $list_sasaran[$data['sasaran']]; ?></td>
-											<td class="padat"><?= $data['status']; ?></td>
+											<td class="text-center" colspan="8">Data Tidak Tersedia</td>
 										</tr>
-									<?php endforeach; ?>
+									<?php endif; ?>
 								</tbody>
 							</table>
 					</div>
