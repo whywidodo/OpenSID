@@ -1,7 +1,7 @@
 <?php $this->load->view('global/validasi_form'); ?>
 <div class="content-wrapper">
 	<section class="content-header">
-		<h1>Tambah Program Bantuan</h1>
+		<h1><?= ($program) ? 'Ubah' : 'Tambah'?> Program Bantuan</h1>
 		<ol class="breadcrumb">
 			<li><a href="<?= site_url('hom_sid'); ?>"><i class="fa fa-home"></i> Home</a></li>
 			<li><a href="<?= site_url('program_bantuan'); ?>"> Daftar Program Bantuan</a></li>
