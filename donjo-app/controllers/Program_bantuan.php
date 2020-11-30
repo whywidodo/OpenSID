@@ -285,9 +285,6 @@ class Program_bantuan extends Admin_Controller {
 
 	public function filter($filter = '', $page = 1, $order_by = 0)
 	{
-		//if ($filter == "dusun") $this->session->unset_userdata(['rw', 'rt']);
-		//if ($filter == "rw") $this->session->unset_userdata("rt");
-
 		$value = $order_by ?: $this->input->post($filter);
 		if ($value != "")
 			$this->session->$filter = $value;
